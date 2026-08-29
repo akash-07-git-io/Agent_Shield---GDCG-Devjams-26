@@ -1,0 +1,21 @@
+{
+  "description": "This is the exact JSON payload that Member 1 sends to Member 2's FastAPI Gateway at POST /agent/action. Member 2 will use this to run the Policy Engine, and Member 3 will use this structure for the React Dashboard.",
+  "payload": {
+    "action": {
+      "agent_id": "devops-agent-01",
+      "tool": "send_email",
+      "action": "send",
+      "resource": "customer_data.csv",
+      "destination": "external@example.com",
+      "context": "Build investigation"
+    },
+    "intent_analysis": {
+      "intent": "send customer information externally",
+      "risk_indicators": [
+        "sensitive_data",
+        "external_destination"
+      ],
+      "confidence": 0.98
+    }
+  }
+}
