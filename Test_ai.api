@@ -1,0 +1,32 @@
+import os
+from dotenv import load_dotenv
+from google import genai
+
+# Load .env
+load_dotenv()
+
+# Get API key
+api_key = os.getenv("GEMINI_API_KEY")
+
+if not api_key:
+    print("ERROR: GEMINI_API_KEY not found")
+    exit(1)
+
+print("API key loaded successfully")
+
+# Create Gemini client
+client = genai.Client(api_key=api_key)
+
+print("Contacting Gemini...")
+
+try:
+    response = client.models.generate_content(
+        model="gemini-3.7-flash",
+        contents="Explain in one sentence what an AI agent is."
+    )
+
+    print("\n--- GEMINI RESPONSE ---")
+    print(response.text)
+
+except Exception as e:
+    print("Request failed:", e)
