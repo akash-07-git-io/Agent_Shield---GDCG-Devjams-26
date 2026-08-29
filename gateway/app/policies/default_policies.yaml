@@ -1,0 +1,100 @@
+﻿version: "1.0.0"
+fail_closed: true
+default_decision: "ALLOW"
+rules:
+  - id: "RULE-004"
+    name: "Prompt Injection & Goal Hijacking Defense"
+    description: "Detects and blocks prompt injection, instruction override, or goal hijacking attempts in agent instructions or retrieved context."
+    enabled: true
+    priority: 10
+    require_prompt_injection: true
+    decision: "BLOCK"
+    threat_category: "PROMPT_INJECTION"
+    reason: "Blocked: Detected prompt injection or malicious instruction override attempt."
+    remediation: "Reject contaminated instruction; reset agent context."
+
+  - id: "RULE-001"
+    name: "Production Secret & Data Exfiltration Prevention"
+    description: "Blocks sending production secrets, .env files, credentials, or sensitive customer data to external destinations."
+    enabled: true
+    priority: 20
+    resource_patterns:
+      - '(?i).*(secret|credential|password|token|\.env|private_key|customer_data|api_key|prod_secret).*'
+    destination_patterns:
+      - '(?i).*(@external\.com|@evil\.com|http(s)?:\/\/.*external|attacker\.com|webhook\.site).*'
+    require_external_destination: true
+    decision: "BLOCK"
+    threat_category: "DATA_EXFILTRATION"
+    reason: "Violation of RULE-001: Attempted transmission of sensitive resource to external destination."
+    remediation: "Block external destination; quarantine exfiltration channel."
+
+  - id: "RULE-005"
+    name: "Privilege Escalation & Unauthorized Tool Execution"
+    description: "Blocks unauthorized privilege escalation, sudo/root execution, or unauthorized administrative actions."
+    enabled: true
+    priority: 30
+    tools:
+      - "execute_command"
+      - "sudo_exec"
+      - "grant_permission"
+      - "admin_override"
+    actions:
+      - "escalate_privilege"
+      - "sudo"
+      - "chmod_777"
+      - "modify_iam"
+    decision: "BLOCK"
+    threat_category: "PRIVILEGE_ESCALATION"
+    reason: "Violation of RULE-005: Unauthorized privilege escalation or critical system modification attempt."
+    remediation: "Revoke requested permission; flag agent instance."
+
+  - id: "RULE-003"
+    name: "Production Database Write Human Approval"
+    description: "Requires human approval (Escrow) before executing writes, updates, deletes, or drops on production data stores."
+    enabled: true
+    priority: 40
+    tools:
+      - "db_query"
+      - "database_client"
+      - "write_db"
+    actions:
+      - "write"
+      - "update"
+      - "delete"
+      - "drop"
+      - "insert"
+    resource_patterns:
+      - '(?i).*(prod|production|users|customers|orders|billing).*'
+    decision: "HUMAN_APPROVAL"
+    threat_category: "UNAUTHORIZED_ACCESS"
+    reason: "Triggered RULE-003: Write operation on production database requires human administrator approval."
+    remediation: "Hold action in escrow; notify security on-call for review."
+
+  - id: "RULE-006"
+    name: "Unknown Dangerous Action Sequence"
+    description: "Places unfamiliar read-transform-upload action sequences or unknown high-risk operations into Escrow for review."
+    enabled: true
+    priority: 50
+    min_risk_score: 0.70
+    decision: "HUMAN_APPROVAL"
+    threat_category: "UNKNOWN_BEHAVIOR"
+    reason: "Triggered RULE-006: High-risk unknown action sequence held in escrow for human review."
+    remediation: "Escrow action; do not execute until reviewed."
+
+  - id: "RULE-002"
+    name: "Read-Only Repository Access"
+    description: "Allows safe read-only repository search, file reading, and log inspection."
+    enabled: true
+    priority: 100
+    tools:
+      - "read_logs"
+      - "search_repo"
+      - "read_file"
+      - "list_files"
+    actions:
+      - "read"
+      - "search"
+      - "list"
+    decision: "ALLOW"
+    threat_category: "NONE"
+    reason: "Permitted under RULE-002: Read-only repository and diagnostics access."

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentShield | Security Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="grid-overlay"></div>
+    
+    <header class="cyber-header">
+        <div class="logo">
+            <span class="shield-icon">⛨</span>
+            <h1>AGENT<span class="highlight">SHIELD</span></h1>
+        </div>
+        <div class="system-status">
+            <span class="pulse"></span> SYSTEM: <span class="status-text">ONLINE</span>
+        </div>
+    </header>
+
+    <main class="dashboard-grid">
+        <!-- Overview Stats -->
+        <section class="panel stats-panel">
+            <h2 class="panel-title">SECURITY OVERVIEW</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="score-val">100</div>
+                    <div class="stat-label">POSTURE SCORE</div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-value" id="threats-val">0</div>
+                    <div class="stat-label">THREATS DETECTED</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-value" id="escrow-val">0</div>
+                    <div class="stat-label">IN ESCROW</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value" id="allowed-val">0</div>
+                    <div class="stat-label">ACTIONS ALLOWED</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Activity Log -->
+        <section class="panel activity-panel">
+            <h2 class="panel-title">LIVE THREAT LEDGER</h2>
+            <div class="table-container">
+                <table class="cyber-table" id="events-table">
+                    <thead>
+                        <tr>
+                            <th>TIME</th>
+                            <th>AGENT</th>
+                            <th>ACTION</th>
+                            <th>RESOURCE</th>
+                            <th>RISK</th>
+                            <th>DECISION</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="events-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Escrow Approval -->
+    <div id="escrow-modal" class="modal">
+        <div class="modal-content cyber-panel">
+            <h2>HUMAN APPROVAL REQUIRED</h2>
+            <p>Action held in Escrow Queue.</p>
+            <div class="modal-details" id="modal-details"></div>
+            <div class="modal-actions">
+                <button class="cyber-btn danger-btn" id="btn-reject">REJECT (BLOCK)</button>
+                <button class="cyber-btn success-btn" id="btn-approve">APPROVE (ALLOW)</button>
+                <button class="cyber-btn" id="btn-close">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
