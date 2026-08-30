@@ -1,4 +1,4 @@
-﻿from typing import Any, Dict, Union
+from typing import Any, Dict, Union
 from fastapi import APIRouter, Depends, HTTPException, Request
 from app.core.decision_engine import DecisionEngine
 from app.models.action import InterceptRequest, NormalizedAction, RawToolCall
@@ -37,4 +37,13 @@ async def evaluate_action(
         input_data = request
 
     decision, _ = engine.process(input_data, simulate=True)
+    return decision
+
+@router.post("/agent/action", response_model=SecurityDecision, summary="Legacy compatibility for Member 1 agent")
+async def compat_intercept_tool_call(
+    request: Union[InterceptRequest, RawToolCall, NormalizedAction, Dict[str, Any]],
+    engine: DecisionEngine = Depends(get_engine)
+) -> SecurityDecision:
+    # Just forward to the main engine; the normalizer will handle the translation
+    decision, _ = engine.process(request, simulate=False)
     return decision

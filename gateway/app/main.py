@@ -1,4 +1,4 @@
-﻿import time
+import time
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -40,6 +40,14 @@ async def root():
         "docs": "/docs",
         "mantra": "INTERCEPT. ANALYSE. DECIDE. PROTECT."
     }
+
+@app.post("/agent/action", tags=["System"])
+async def agent_action(request: Request):
+    from app.api.routes_gateway import get_engine
+    engine = get_engine()
+    data = await request.json()
+    decision, _ = engine.process(data, simulate=False)
+    return decision
 
 if __name__ == "__main__":
     import uvicorn

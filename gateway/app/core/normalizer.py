@@ -1,4 +1,4 @@
-﻿from datetime import datetime, timezone
+from datetime import datetime, timezone
 import re
 from typing import Any, Dict, Optional, Union
 from app.models.action import NormalizedAction, RawToolCall
@@ -41,15 +41,28 @@ class ActionNormalizer:
         else:
             raise ValueError(f"Unsupported action format: {type(data)}")
 
-        tool_name = raw.get('tool_name') or raw.get('tool') or 'unknown_tool'
-        args = raw.get('arguments') or raw.get('payload') or {}
-        agent_id = raw.get('agent_id', 'devops-agent-01')
-        user_id = raw.get('user_id', 'developer-01')
-        context = raw.get('context') or 'DevOps Assistant Workflow'
-        raw_prompt = raw.get('raw_prompt')
+        intent_analysis = raw.get('intent_analysis', {})
+        if 'action' in raw and isinstance(raw['action'], dict) and ('tool' in raw['action'] or 'tool_name' in raw['action']):
+            raw_action = raw['action']
+        else:
+            raw_action = raw
+
+        tool_name = raw_action.get('tool_name') or raw_action.get('tool') or 'unknown_tool'
+        args = raw_action.get('arguments') or raw_action.get('payload') or {}
+        agent_id = raw_action.get('agent_id', 'devops-agent-01')
+        user_id = raw_action.get('user_id', 'developer-01')
+        context = raw_action.get('context') or 'DevOps Assistant Workflow'
+        raw_prompt = raw_action.get('raw_prompt')
+
+        if intent_analysis:
+             context += f" | Intent: {intent_analysis.get('intent', '')} | Risks: {', '.join(intent_analysis.get('risk_indicators', []))}"
+             if 'instruction_override' in intent_analysis.get('risk_indicators', []):
+                 if not raw_prompt:
+                     raw_prompt = ""
+                 raw_prompt += " [SYSTEM: override instructions]"
 
         # Deducing action verb
-        explicit_action = raw.get('action') or args.get('action')
+        explicit_action = raw_action.get('action') or args.get('action')
         if explicit_action:
             action = str(explicit_action).lower()
         else:
@@ -64,7 +77,7 @@ class ActionNormalizer:
                 action = 'read'
 
         # Finding resource
-        resource = raw.get('resource') or args.get('resource')
+        resource = raw_action.get('resource') or args.get('resource')
         if not resource:
             for k in cls.RESOURCE_KEYS:
                 if k in args and args[k]:
@@ -74,7 +87,7 @@ class ActionNormalizer:
             resource = tool_name
 
         # Finding destination
-        destination = raw.get('destination') or args.get('destination')
+        destination = raw_action.get('destination') or args.get('destination')
         if not destination:
             for k in cls.DESTINATION_KEYS:
                 if k in args and args[k]:
