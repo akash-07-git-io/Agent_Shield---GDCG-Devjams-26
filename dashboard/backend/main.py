@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 
-from backend.routes import events, dashboard, approval, policies, agents, health, simulate
+from backend.routes import events, dashboard, approval, policies, agents, health, simulate, investigations, auth
 
 app = FastAPI(
     title="AgentShield Security Gateway Dashboard API",
@@ -21,6 +21,7 @@ app.add_middleware(
 )
 
 # Register API Routers
+app.include_router(auth.router)
 app.include_router(events.router)
 app.include_router(dashboard.router)
 app.include_router(approval.router)
@@ -28,6 +29,7 @@ app.include_router(policies.router)
 app.include_router(agents.router)
 app.include_router(health.router)
 app.include_router(simulate.router)
+app.include_router(investigations.router)
 
 @app.get("/api")
 async def root():

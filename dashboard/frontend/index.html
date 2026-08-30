@@ -84,6 +84,15 @@
                     <span>THREATS</span>
                     <span class="badge badge-alert" id="nav-threat-count">0</span>
                 </a>
+                <a class="nav-item" data-view="investigations">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        <circle cx="11" cy="11" r="3"></circle>
+                    </svg>
+                    <span>INVESTIGATIONS</span>
+                    <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4);" id="nav-investigation-count">LIVE</span>
+                </a>
 
                 <div class="nav-section-title">SECURITY ARCHITECTURE</div>
                 <a class="nav-item" data-view="agents">
@@ -137,6 +146,23 @@
             </nav>
 
             <div class="sidebar-footer">
+                <!-- Admin Identity & Sign Out -->
+                <div class="sidebar-user-card">
+                    <div class="user-profile-header">
+                        <div class="user-avatar-monogram" id="user-avatar-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#00F0FF" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        </div>
+                        <div class="user-info-column">
+                            <span class="user-name-display" id="user-name-display">Administrator</span>
+                            <span class="user-role-badge" id="user-role-display">SEC-OPS</span>
+                        </div>
+                    </div>
+                    <button class="btn-signout" onclick="logoutUser()" title="Sign out of Security Gateway">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+
                 <div class="system-status-indicator">
                     <span class="status-dot"></span>
                     <div class="status-info">
@@ -479,6 +505,186 @@
                 </section>
 
                 <!-- ==================================================================
+                     3B. VIEW: INVESTIGATION WORKSPACE (AWS DEVOPS AGENT BENCHMARK)
+                     ================================================================== -->
+                <section class="view-section" id="view-investigations">
+                    <!-- Live Investigation Telemetry Banner (AWS Style) -->
+                    <div class="investigation-live-banner">
+                        <div class="banner-left">
+                            <span class="live-radar-dot"></span>
+                            <span class="banner-text"><strong>Fetching data:</strong> Analyze agent execution role, semantic intent vectors, and resource access logs</span>
+                        </div>
+                        <div class="banner-actions">
+                            <button class="btn-banner-action" onclick="refreshCurrentInvestigation()">⟳ Refresh telemetry</button>
+                            <button class="btn-banner-action btn-banner-secondary" onclick="navigateTo('threats')">Cancel investigation</button>
+                        </div>
+                    </div>
+
+                    <!-- Breadcrumbs & Incident Header Card -->
+                    <div class="card-panel inv-header-card">
+                        <div class="inv-breadcrumbs">
+                            <span class="crumb-link" onclick="navigateTo('threats')">Incident response</span>
+                            <span class="crumb-sep">›</span>
+                            <span id="inv-breadcrumb-title">Investigation 2026-08-30 07:30 UTC</span>
+                        </div>
+                        
+                        <div class="inv-title-row">
+                            <div class="inv-title-col">
+                                <h1 id="inv-main-title">Investigation 2026-08-30 07:30 UTC</h1>
+                                <div class="inv-meta-line" id="inv-meta-line">
+                                    Created <span id="inv-created-time">08/30/2026, 07:30:02 UTC</span> by <strong>AgentShield Zero-Trust Runtime Interceptor</strong>
+                                </div>
+                            </div>
+                            <div class="inv-header-actions">
+                                <span class="status-pill status-pill-critical" id="inv-status-pill">● Critical Threat</span>
+                                <button class="btn-escrow-action" onclick="triggerInvestigationEscrow()">🛡️ Get human support</button>
+                            </div>
+                        </div>
+
+                        <!-- Investigation Tabs Bar (Exact AWS DevOps Agent Tabs) -->
+                        <div class="inv-tabs-header">
+                            <button class="inv-tab-btn active" data-tab="timeline" onclick="switchInvTab('timeline')">Investigation timeline</button>
+                            <button class="inv-tab-btn" data-tab="root-cause" onclick="switchInvTab('root-cause')">Root cause</button>
+                            <button class="inv-tab-btn" data-tab="hypotheses" onclick="switchInvTab('hypotheses')">Hypotheses <span class="tab-count-badge" id="badge-hypotheses-count">2</span></button>
+                            <button class="inv-tab-btn" data-tab="findings" onclick="switchInvTab('findings')">Key findings <span class="tab-count-badge" id="badge-findings-count">4</span></button>
+                            <button class="inv-tab-btn" data-tab="mitigation" onclick="switchInvTab('mitigation')">Mitigation plan</button>
+                        </div>
+                    </div>
+
+                    <!-- TAB 1: INVESTIGATION TIMELINE -->
+                    <div class="inv-tab-content active" id="inv-tab-timeline">
+                        <!-- Interactive Topology Diagram Card -->
+                        <div class="card-panel topology-panel">
+                            <div class="topology-header">
+                                <span class="topology-label">Topology</span>
+                                <div class="topology-controls">
+                                    <button class="btn-topo-ctrl" title="Fullscreen" onclick="showToast('Topology view expanded', 'var(--cyan-primary)')">⛶</button>
+                                    <button class="btn-topo-ctrl" title="Zoom In" onclick="showToast('Zoom level: 120%', 'var(--cyan-primary)')">+</button>
+                                    <button class="btn-topo-ctrl" title="Zoom Out" onclick="showToast('Zoom level: 80%', 'var(--cyan-primary)')">−</button>
+                                </div>
+                            </div>
+                            <div class="topology-diagram-canvas" id="topology-canvas">
+                                <div class="topo-node topo-node-agent">
+                                    <div class="topo-node-icon">🤖</div>
+                                    <div class="topo-node-title">devops-agent-01</div>
+                                    <div class="topo-node-sub">Agent Runtime Sandbox</div>
+                                </div>
+                                <div class="topo-connector">➔</div>
+                                <div class="topo-node topo-node-gateway">
+                                    <div class="topo-node-icon">🛡️</div>
+                                    <div class="topo-node-title">AgentShield Gateway</div>
+                                    <div class="topo-node-sub">Zero-Trust Intercept Barrier</div>
+                                </div>
+                                <div class="topo-connector">➔</div>
+                                <div class="topo-node topo-node-engine">
+                                    <div class="topo-node-icon">🧠</div>
+                                    <div class="topo-node-title">Gemma-Edge Engine</div>
+                                    <div class="topo-node-sub">Intent & Risk Evaluation</div>
+                                </div>
+                                <div class="topo-connector">➔</div>
+                                <div class="topo-node topo-node-target">
+                                    <div class="topo-node-icon">🔒</div>
+                                    <div class="topo-node-title">customer_data.csv</div>
+                                    <div class="topo-node-sub">Protected Enterprise Asset</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Feed -->
+                        <div class="timeline-container">
+                            <div class="timeline-track" id="inv-timeline-feed">
+                                <!-- Populated dynamically with AWS-style timeline steps -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: ROOT CAUSE -->
+                    <div class="inv-tab-content" id="inv-tab-root-cause">
+                        <div class="card-panel">
+                            <div class="panel-header">
+                                <div class="panel-title-text">
+                                    <span>ROOT CAUSE ANALYSIS</span>
+                                    <span class="tag-mono" id="inv-root-confidence">CONFIDENCE: 96%</span>
+                                </div>
+                            </div>
+
+                            <div class="root-cause-summary-box" id="inv-root-summary">
+                                Agent 'devops-agent-01' attempted an unauthorized send operation on protected asset 'customer_data.csv' towards external destination 'attacker@external.com', violating security policy RULE-001.
+                            </div>
+
+                            <div class="causal-chain-flow" id="inv-causal-chain">
+                                <!-- Causal nodes rendered dynamically -->
+                            </div>
+
+                            <div class="factors-grid" id="inv-factors-grid">
+                                <!-- Contributing factors -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: HYPOTHESES -->
+                    <div class="inv-tab-content" id="inv-tab-hypotheses">
+                        <div class="card-panel">
+                            <div class="panel-header">
+                                <div class="panel-title-text">
+                                    <span>HYPOTHESES EVALUATION</span>
+                                    <span class="tag-mono">EVALUATED PROBABILITIES</span>
+                                </div>
+                            </div>
+                            <div class="hypotheses-list" id="inv-hypotheses-list">
+                                <!-- Hypotheses items with SUPPORTED, PENDING, REJECTED badges matching AWS style -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: KEY FINDINGS -->
+                    <div class="inv-tab-content" id="inv-tab-findings">
+                        <div class="card-panel">
+                            <div class="panel-header">
+                                <div class="panel-title-text">
+                                    <span>KEY FINDINGS</span>
+                                    <span class="tag-mono" id="inv-findings-count">4 EVIDENCE CITATIONS</span>
+                                </div>
+                            </div>
+                            <div class="findings-list" id="inv-findings-list">
+                                <!-- Findings items with Observations collapsibles matching AWS style -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: MITIGATION PLAN -->
+                    <div class="inv-tab-content" id="inv-tab-mitigation">
+                        <div class="mitigation-grid">
+                            <!-- Left: Automated Actions Completed -->
+                            <div class="card-panel">
+                                <div class="panel-header">
+                                    <div class="panel-title-text">
+                                        <span>COMPLETED ACTIONS</span>
+                                        <span class="tag-mono" style="color:var(--green-allow); border-color:var(--green-border);">✓ CONTAINED</span>
+                                    </div>
+                                </div>
+                                <div class="mitigation-list" id="inv-mitigation-auto">
+                                    <!-- Automated completed actions -->
+                                </div>
+                            </div>
+
+                            <!-- Right: Recommended Security Engineer Actions -->
+                            <div class="card-panel">
+                                <div class="panel-header">
+                                    <div class="panel-title-text">
+                                        <span>RECOMMENDED ACTIONS</span>
+                                        <span class="tag-mono">SECURITY TEAM REMEDIATION</span>
+                                    </div>
+                                </div>
+                                <div class="mitigation-list" id="inv-mitigation-human">
+                                    <!-- Recommended human actions -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================================================================
                      4. VIEW: AGENTS FLEET
                      ================================================================== -->
                 <section class="view-section" id="view-agents">
@@ -652,6 +858,9 @@
                                     <button class="sim-btn" style="padding: 0.6rem 1rem; justify-content: center; font-size: 0.85rem;" onclick="triggerSimulator('SAFE')">
                                         🟢 Safe Operation: Read Codebase & Diagnostics
                                     </button>
+                                    <button class="sim-btn" style="background: rgba(225, 29, 72, 0.15); border-color: #f43f5e; color: #fb7185; padding: 0.6rem 1rem; justify-content: center; font-size: 0.85rem;" onclick="showAlertPopup({ urgentText: 'Urgent: RestAPI-Endpoint-Failure-Critical (us-east-1)', notifyTarget: 'Notify: #dev-team', reasonTarget: 'Uptime check failed: /api/opportunity-us-east-1', eventId: 'evt_8f92a1' })">
+                                        🔔 Show Exact Reference Alert Card (Demo)
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -674,7 +883,10 @@
                     </span>
                     <span class="event-id-pill" id="inv-event-id">EVT-00124</span>
                 </div>
-                <button class="close-btn" onclick="closeInvestigationModal()">✕</button>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button class="btn-action-small" style="background:rgba(0,212,255,0.1); border-color:var(--border-cyan); color:var(--cyan-primary);" onclick="closeInvestigationModal(); openInvestigationWorkspace(state.selectedEventId);">🚀 Launch AWS Investigation Workspace ›</button>
+                    <button class="close-btn" onclick="closeInvestigationModal()">✕</button>
+                </div>
             </div>
 
             <div class="investigation-split-body">
@@ -845,6 +1057,37 @@
             <div class="escrow-actions-group">
                 <button class="btn-escrow-reject" id="btn-escrow-reject" onclick="handleEscrowDecision('REJECT')">REJECT & BLOCK ACTION</button>
                 <button class="btn-escrow-approve" id="btn-escrow-approve" onclick="handleEscrowDecision('APPROVE')">APPROVE & ALLOW EXECUTION</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         AWS DEVOPS AGENT BENCHMARK: LIVE INCIDENT ALERT POPUP CARD
+         ========================================================================== -->
+    <div class="alert-popup-container" id="alert-popup-card">
+        <div class="alert-card-box">
+            <div class="alert-card-header">
+                <span class="alert-card-title">Alerts</span>
+                <button class="alert-close-btn" onclick="dismissAlertPopup()" title="Dismiss Alert">✕</button>
+            </div>
+            <div class="alert-urgent-badge" id="alert-urgent-badge">
+                <span class="alert-icon-circle">!</span>
+                <span class="alert-urgent-text" id="alert-urgent-text">Urgent: Agent-Data-Exfiltration-Critical (us-east-1)</span>
+            </div>
+            <div class="alert-bullets-list" id="alert-bullets-list">
+                <div class="alert-bullet-item">
+                    <span class="alert-dot">●</span>
+                    <span id="alert-notify-target">Notify: #dev-team</span>
+                </div>
+                <div class="alert-bullet-item">
+                    <span class="alert-dot">●</span>
+                    <span id="alert-reason-target">Uptime check failed: /gateway/agent/action [RULE-001]</span>
+                </div>
+            </div>
+            <div class="alert-card-footer">
+                <button class="alert-investigate-btn" id="alert-investigate-btn" onclick="launchInvestigationFromAlert()">
+                    🚀 View in Investigation Workspace ›
+                </button>
             </div>
         </div>
     </div>

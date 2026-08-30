@@ -39,11 +39,18 @@ async def evaluate_action(
     decision, _ = engine.process(input_data, simulate=True)
     return decision
 
-@router.post("/agent/action", response_model=SecurityDecision, summary="Legacy compatibility for Member 1 agent")
+@router.post("/actions/evaluate", response_model=SecurityDecision, summary="Standard Agent Action Evaluation")
+async def standard_action_evaluate(
+    request: Dict[str, Any],
+    engine: DecisionEngine = Depends(get_engine)
+) -> SecurityDecision:
+    decision, _ = engine.process(request, simulate=False)
+    return decision
+
+@router.post("/agent/action", response_model=SecurityDecision, summary="Compatibility for agent actions")
 async def compat_intercept_tool_call(
     request: Union[InterceptRequest, RawToolCall, NormalizedAction, Dict[str, Any]],
     engine: DecisionEngine = Depends(get_engine)
 ) -> SecurityDecision:
-    # Just forward to the main engine; the normalizer will handle the translation
     decision, _ = engine.process(request, simulate=False)
     return decision
