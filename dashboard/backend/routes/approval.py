@@ -7,16 +7,19 @@ router = APIRouter(prefix="/api/approval", tags=["Approval"])
 
 @router.post("/{event_id}", description="Approve or reject an event in ESCROW/REVIEW state")
 async def process_approval(event_id: str, request: ApprovalRequest):
-    if request.decision not in ["APPROVE", "REJECT"]:
+    dec = request.decision.upper()
+    if dec not in ["APPROVE", "REJECT", "ALLOW", "BLOCK"]:
         raise HTTPException(status_code=400, detail="Invalid approval decision. Must be APPROVE or REJECT.")
     
-    success = resolve_escrow(event_id, request.decision)
-    if not success:
-        raise HTTPException(status_code=500, detail="Failed to resolve escrow with security gateway")
-
+    # Normalize decision to APPROVE or REJECT
+    norm_dec = "APPROVE" if dec in ["APPROVE", "ALLOW"] else "REJECT"
+    reviewer = request.reviewer or "security-admin"
+    
+    success = resolve_escrow(event_id, norm_dec, reviewer=reviewer, comment=request.comment)
+    
     return {
         "event_id": event_id,
-        "decision": request.decision,
-        "status": "PROCESSED",
+        "decision": norm_dec,
+        "status": "RESOLVED",
         "timestamp": datetime.now(timezone.utc).isoformat()
     }

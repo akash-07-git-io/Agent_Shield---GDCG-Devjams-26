@@ -1,7 +1,8 @@
 import requests
 from models import ActionObject, IntentObject
 
-GATEWAY_URL = "http://localhost:8000/agent/action"
+GATEWAY_URL = "http://127.0.0.1:8000/api/v1/gateway/agent/action"
+GATEWAY_URL_FALLBACK = "http://127.0.0.1:8000/agent/action"
 
 def send_to_gateway(action: ActionObject, intent: IntentObject):
     """
@@ -17,7 +18,11 @@ def send_to_gateway(action: ActionObject, intent: IntentObject):
     print(f"POST {GATEWAY_URL}")
     
     try:
-        response = requests.post(GATEWAY_URL, json=payload, timeout=2)
+        try:
+            response = requests.post(GATEWAY_URL, json=payload, timeout=2)
+        except Exception:
+            response = requests.post(GATEWAY_URL_FALLBACK, json=payload, timeout=2)
+            
         response.raise_for_status()
         print("Response from Gateway:")
         print(response.json())

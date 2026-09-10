@@ -43,8 +43,8 @@ async def root():
 
 @app.post("/agent/action", tags=["System"])
 async def agent_action(request: Request):
-    from app.core.decision_engine import DecisionEngine
-    engine = DecisionEngine()
+    from app.api.routes_gateway import get_engine
+    engine = get_engine()
     data = await request.json()
     decision, _ = engine.process(data, simulate=False)
     return decision
